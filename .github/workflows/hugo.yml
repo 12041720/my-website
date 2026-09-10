@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -35,6 +36,9 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Sync economics course posts
+        run: python3 scripts/sync_economics_blog.py
+
       - name: Install Node.js dependencies
         run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"
 
@@ -45,8 +49,7 @@ jobs:
         run: |
           hugo \
             --gc \
-            --minify \
-            --baseURL "https://12041720.github.io/"
+            --minify
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

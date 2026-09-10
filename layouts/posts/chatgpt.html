@@ -1,0 +1,37 @@
+{{- define "main" }}
+
+<article class="chatgpt-post">
+  <div class="chatgpt-coursebar">
+    <a href="{{ .Parent.RelPermalink }}">经济学总地图</a>
+    <span aria-hidden="true">›</span>
+    <span>
+      {{- if eq (.Params.courseOrder | int) 0 -}}
+        课程总览
+      {{- else -}}
+        第 {{ .Params.courseOrder }} 课
+      {{- end -}}
+    </span>
+  </div>
+
+  <section class="chatgpt-message" aria-label="课程正文">
+    <div class="chatgpt-avatar" aria-hidden="true"><span>AI</span></div>
+
+    <div class="chatgpt-message-body">
+      <header class="chatgpt-article-header">
+        <h1>{{ .Title }}</h1>
+      </header>
+
+      {{- if .Content }}
+      <div class="post-content chatgpt-content">
+        {{ .Content }}
+      </div>
+      {{- end }}
+    </div>
+  </section>
+
+  <nav class="chatgpt-course-footer" aria-label="课程导航">
+    <a href="{{ .Parent.RelPermalink }}">← 返回经济学总地图课程目录</a>
+  </nav>
+</article>
+
+{{- end }}
