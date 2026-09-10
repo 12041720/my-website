@@ -1,0 +1,34 @@
+{{- define "main" }}
+
+<section class="chatgpt-index">
+  <header class="chatgpt-index-header">
+    <div class="chatgpt-index-badge">ECONOMICS</div>
+    <h1>{{ .Title }}</h1>
+    {{- with .Description }}
+    <p>{{ . }}</p>
+    {{- end }}
+  </header>
+
+  <div class="chatgpt-chapter-list">
+    {{- range .RegularPages.ByWeight }}
+    <a class="chatgpt-chapter-card" href="{{ .RelPermalink }}">
+      <div class="chatgpt-chapter-number">
+        {{- if eq (.Params.courseOrder | int) 0 -}}
+          总览
+        {{- else -}}
+          {{ printf "%02d" (.Params.courseOrder | int) }}
+        {{- end -}}
+      </div>
+      <div class="chatgpt-chapter-copy">
+        <h2>{{ .Title }}</h2>
+        {{- with .Description }}
+        <p>{{ . }}</p>
+        {{- end }}
+      </div>
+      <span class="chatgpt-chapter-arrow" aria-hidden="true">→</span>
+    </a>
+    {{- end }}
+  </div>
+</section>
+
+{{- end }}
