@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -36,8 +36,38 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Sync economics course posts
-        run: python3 scripts/sync_economics_blog.py
+      - name: Bootstrap economics course posts
+        env:
+          ECONOMICS_ARTIFACT_URL: "https://sdmntprwestcentralus.oaiusercontent.com/files/00000000-0a48-81fb-bd48-c6a05a36cfac/raw?se=2026-09-10T09%3A02%3A51Z&sp=r&sv=2026-02-06&sr=b&scid=3273d89b-74ec-57df-853f-36786c41fcb9&skoid=18c14e53-ea0c-429b-8d09-d22d66ca7169&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-10T05%3A40%3A58Z&ske=2026-09-11T05%3A40%3A58Z&sks=b&skv=2026-02-06&sig=buTq%2BWoU1lxPFEd%2B66TQVqY88kbhqyLd4CYIK/FviKE%3D"
+        run: |
+          if [[ -f content/posts/economics/12-lesson.md ]]; then
+            echo "Economics posts already committed; bootstrap not needed."
+            exit 0
+          fi
+
+          rm -rf /tmp/economics-export
+          mkdir -p /tmp/economics-export
+          curl --fail --location --retry 3 "$ECONOMICS_ARTIFACT_URL" -o /tmp/economics-export.zip
+          unzip -q /tmp/economics-export.zip -d /tmp/economics-export
+
+          SOURCE=/tmp/economics-export/economics-assistant-only.md
+          test -f "$SOURCE"
+          test "$(grep -c '^## ChatGPT 回答 [0-9][0-9]*$' "$SOURCE")" -eq 13
+          if grep -q '^## 用户提问' "$SOURCE"; then
+            echo "Refusing to publish user prompts."
+            exit 1
+          fi
+
+          ECONOMICS_SOURCE_FILE="$SOURCE" python3 scripts/sync_economics_blog.py
+          test -f content/posts/economics/00-map.md
+          test -f content/posts/economics/12-lesson.md
+          test "$(find content/posts/economics -maxdepth 1 -name '*-lesson.md' | wc -l)" -eq 12
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/posts/economics
+          git commit -m "Publish economics course articles"
+          git push origin HEAD:main
 
       - name: Install Node.js dependencies
         run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"

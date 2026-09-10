@@ -2,20 +2,15 @@
 from __future__ import annotations
 
 import json
+import os
 import re
-import urllib.request
 from pathlib import Path
 
-SOURCE_URL = (
-    "https://raw.githubusercontent.com/12041720/invest/main/tutorial/"
-    "%E7%BB%8F%E6%B5%8E%E5%AD%A6%E6%80%BB%E5%9C%B0%E5%9B%BE-"
-    "%E5%AE%8C%E6%95%B4%E5%AF%B9%E8%AF%9D.md"
-)
 OUTPUT_DIR = Path("content/posts/economics")
 
 BLOCK_RE = re.compile(
     r"^## ChatGPT 回答 (?P<number>\d+)\s*$"
-    r"(?P<body>.*?)(?=^---\s*$\n+^## 用户提问 \d+\s*$|\Z)",
+    r"(?P<body>.*?)(?=^---\s*$\n+(?:^## 用户提问 \d+\s*$|^## ChatGPT 回答 \d+\s*$)|\Z)",
     re.MULTILINE | re.DOTALL,
 )
 LESSON_TITLE_RE = re.compile(
@@ -24,13 +19,21 @@ LESSON_TITLE_RE = re.compile(
 )
 
 
-def fetch_source() -> str:
-    request = urllib.request.Request(
-        SOURCE_URL,
-        headers={"User-Agent": "12041720-my-website-economics-sync/1.0"},
-    )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return response.read().decode("utf-8")
+def load_source() -> str:
+    source_file = os.environ.get("ECONOMICS_SOURCE_FILE")
+    if not source_file:
+        raise RuntimeError(
+            "Set ECONOMICS_SOURCE_FILE to an assistant-only economics Markdown export."
+        )
+
+    path = Path(source_file)
+    if not path.is_file():
+        raise RuntimeError(f"Economics source file not found: {path}")
+
+    source = path.read_text(encoding="utf-8")
+    if "## 用户提问" in source:
+        raise RuntimeError("Refusing to publish a source that still contains user prompts.")
+    return source
 
 
 def yaml_string(value: str) -> str:
@@ -140,7 +143,7 @@ def write_post(
             "disableShare: true",
             "---",
             "",
-            "<!-- Generated from 12041720/invest. User prompts are intentionally omitted. -->",
+            "<!-- Generated from the assistant-only course snapshot. User prompts are intentionally omitted. -->",
             "",
         ]
     )
@@ -155,13 +158,13 @@ def write_index(post_count: int) -> None:
         'layout: "economics-index"\n'
         'chatgptStyle: true\n'
         '---\n\n'
-        f'当前同步 {post_count} 篇课程文章。\n'
+        f'当前收录 {post_count} 篇课程文章：1 篇总地图 + {post_count - 1} 节课程。\n'
     )
     (OUTPUT_DIR / "_index.md").write_text(index, encoding="utf-8")
 
 
 def main() -> None:
-    source = fetch_source()
+    source = load_source()
     matches = list(BLOCK_RE.finditer(source))
     if not matches:
         raise RuntimeError("No 'ChatGPT 回答 N' blocks found in source markdown.")
