@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quine — This page prints itself</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0d1117;color:#c9d1d9;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}.wrap{max-width:1100px;margin:0 auto;padding:48px 24px}h1{margin:0 0 8px;color:#f0f6fc;font-size:28px}.sub{margin:0 0 28px;color:#8b949e}pre{margin:0;padding:24px;overflow:auto;white-space:pre-wrap;word-break:break-word;border:1px solid #30363d;border-radius:12px;background:#161b22;color:#e6edf3}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Quine</h1>
+<p class="sub">This page generates and displays its own complete source code without fetching the file or reading the DOM source.</p>
+<pre id="source"></pre>
+</main>
+<script>
+function renderSelf() {
+  const source = `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quine — This page prints itself</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0d1117;color:#c9d1d9;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}.wrap{max-width:1100px;margin:0 auto;padding:48px 24px}h1{margin:0 0 8px;color:#f0f6fc;font-size:28px}.sub{margin:0 0 28px;color:#8b949e}pre{margin:0;padding:24px;overflow:auto;white-space:pre-wrap;word-break:break-word;border:1px solid #30363d;border-radius:12px;background:#161b22;color:#e6edf3}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Quine</h1>
+<p class="sub">This page generates and displays its own complete source code without fetching the file or reading the DOM source.</p>
+<pre id="source"></pre>
+</main>
+<script>
+${renderSelf.toString()}
+renderSelf();
+<\/script>
+</body>
+</html>
+`;
+  document.getElementById("source").textContent = source;
+}
+renderSelf();
+</script>
+</body>
+</html>
