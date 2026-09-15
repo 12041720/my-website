@@ -1,5 +1,5 @@
 baseURL = 'https://12041720.github.io/my-website/'
-relativeURLs = true
+relativeURLs = false
 languageCode = 'zh-cn'
 title = '我的个人主页'
 theme = 'PaperMod'
@@ -41,22 +41,22 @@ theme = 'PaperMod'
 [menu]
   [[menu.main]]
     name = "首页"
-    url = "/"
+    pageRef = "/"
     weight = 1
 
   [[menu.main]]
     name = "博客"
-    url = "/posts/"
+    pageRef = "/posts"
     weight = 2
 
   [[menu.main]]
     name = "项目"
-    url = "/projects/"
+    pageRef = "/projects"
     weight = 3
 
   [[menu.main]]
     name = "标签"
-    url = "/tags/"
+    pageRef = "/tags"
     weight = 4
 
 [taxonomies]
